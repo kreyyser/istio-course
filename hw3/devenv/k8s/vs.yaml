@@ -1,0 +1,55 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: authors-v2-90-fflag
+  namespace: istio-course
+spec:
+  hosts:
+  - authors
+  http:
+  - match:
+    - headers:
+        developer:
+          exact: kreyser
+    route:
+    - destination:
+        host: authors
+        subset: fflag
+  - route:
+    - destination:
+        host: authors
+        subset: v1
+      weight: 10
+    - destination:
+        host: authors
+        subset: v2
+      weight: 90
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: books-v2-90-fflag
+  namespace: istio-course
+spec:
+  hosts:
+  - books
+  http:
+  - match:
+    - headers:
+        developer:
+          exact: kreyser
+    route:
+    - destination:
+        host: books
+        subset: fflag
+  - route:
+    - destination:
+        host: books
+        subset: v1
+      weight: 10
+    - destination:
+        host: books
+        subset: v2
+      weight: 90
+---

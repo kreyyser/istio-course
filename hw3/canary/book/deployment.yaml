@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-v2
+  labels:
+    app: books
+    version: v2
+    project: istio-course
+  namespace: istio-course
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books
+      version: v2
+      project: istio-course
+  template:
+    metadata:
+      labels:
+        app: books
+        version: v2
+        project: istio-course
+    spec:
+      serviceAccountName: servicemesh-books
+      containers:
+        - name: books
+          image: kreyyser/books-service:2.0
+          imagePullPolicy: IfNotPresent #Or use Always to download it from dockerhub
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: "/live"
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: "/ready"
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "500M"
+              cpu: "0.15"
+            limits:
+              memory: "1500M"
+              cpu: "0.75"
