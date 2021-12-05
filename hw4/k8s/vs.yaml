@@ -1,0 +1,92 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: authors-fflag
+  namespace: istio-course
+spec:
+  hosts:
+  - authors
+  http:
+  - match:
+    - headers:
+        developer:
+          exact: kreyser
+    route:
+    - destination:
+        host: authors
+        subset: fflag
+  - route:
+    - destination:
+        host: authors
+        subset: v1
+      weight: 50
+    - destination:
+        host: authors
+        subset: v2
+      weight: 50
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: books-fflag
+  namespace: istio-course
+spec:
+  hosts:
+  - books
+  http:
+  - match:
+    - headers:
+        developer:
+          exact: kreyser
+    route:
+    - destination:
+        host: books
+        subset: fflag
+  - route:
+    - destination:
+        host: books
+        subset: v1
+      weight: 50
+    - destination:
+        host: books
+        subset: v2
+      weight: 50
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: course-istio
+  namespace: istio-course
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - course-frontend-gateway
+  http:
+  - match:
+    - headers:
+        developer:
+          exact: kreyser
+      uri:
+        prefix: /frontend-catalog/api/v1/
+    rewrite:
+        uri: /api/v1/
+    route:
+    - destination:
+        host: frontend
+        subset: fflag
+        port:
+          number: 3000
+  - match:
+    - uri:
+        prefix: /frontend-catalog/api/v1/
+    rewrite:
+        uri: /api/v1/
+    route:
+    - destination:
+        host: frontend
+        subset: v1
+        port:
+          number: 3000
+---
